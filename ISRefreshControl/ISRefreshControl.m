@@ -4,20 +4,15 @@
 #import "ISMethodSwizzling.h"
 #import <objc/runtime.h>
 
-typedef NS_ENUM(NSInteger, ISRefreshingState) {
-    ISRefreshingStateNormal,
-    ISRefreshingStateRefreshing,
-    ISRefreshingStateRefreshed,
-};
 
-static CGFloat const ISRefreshControlDefaultHeight = 44.f;
-static CGFloat const ISRefreshControlThreshold = 105.f;
+
+static CGFloat const ISRefreshControlDefaultHeight = 50.f;
+static CGFloat const ISRefreshControlThreshold = 80.f;
 
 @interface ISRefreshControl ()
 
 @property (nonatomic) BOOL addedTopInset;
 @property (nonatomic) BOOL subtractingTopInset;
-@property (nonatomic) ISRefreshingState refreshingState;
 @property (nonatomic, readonly) ISGumView *gumView;
 @property (nonatomic, readonly) ISScalingActivityIndicatorView *indicatorView;
 
@@ -27,7 +22,7 @@ static CGFloat const ISRefreshControlThreshold = 105.f;
 @implementation ISRefreshControl
 
 @synthesize tintColor = _tintColor;
-
+/*
 + (void)load
 {
     @autoreleasepool {
@@ -47,7 +42,7 @@ static CGFloat const ISRefreshControlThreshold = 105.f;
         return (id)[UIRefreshControl alloc];
     }
     return [self _alloc];
-}
+}*/
 
 - (id)initWithCoder:(NSCoder *)coder
 {
@@ -81,6 +76,16 @@ static CGFloat const ISRefreshControlThreshold = 105.f;
             self.tintColor = tintColor;
         }
     }
+}
+
+- (void) setPlaceholderView:(UIView *)placeholderView
+{
+    _placeholderView = placeholderView;
+    
+    [self.gumView removeFromSuperview];
+    [self.indicatorView removeFromSuperview];
+    
+    [self addSubview:placeholderView];
 }
 
 #pragma mark - accessors
@@ -120,6 +125,14 @@ static CGFloat const ISRefreshControlThreshold = 105.f;
     gumViewFrame.origin.y = 10.f;
     gumViewFrame.size = gumViewSize;
     self.gumView.frame = gumViewFrame;
+    
+    CGSize placeholderSize = self.placeholderView.frame.size;
+    CGRect placeholderFrame = self.placeholderView.frame;
+    placeholderFrame.origin.x = (self.frame.size.width - placeholderSize.width) / 2.f;
+    placeholderFrame.origin.y = self.placeholderView.frame.size.height;//(self.frame.size.height - placeholderSize.width) / 2.f;
+    self.placeholderView.frame = placeholderFrame;
+    
+    
 }
 
 - (void)willMoveToSuperview:(UIView *)superview
@@ -184,6 +197,8 @@ static CGFloat const ISRefreshControlThreshold = 105.f;
         self.hidden = (offset > 0);
     }
     
+    _offsetY = offset;
+    
     switch (self.refreshingState) {
         case ISRefreshingStateNormal:
             if (offset <= -ISRefreshControlThreshold && scrollView.isTracking) {
@@ -204,6 +219,9 @@ static CGFloat const ISRefreshControlThreshold = 105.f;
             }
             break;
     }
+    
+    
+    [self sendActionsForControlEvents:UIControlEventEditingChanged];
 }
 
 #pragma mark -
