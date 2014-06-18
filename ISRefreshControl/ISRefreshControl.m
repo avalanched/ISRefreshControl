@@ -7,7 +7,7 @@
 
 
 static CGFloat const ISRefreshControlDefaultHeight = 50.f;
-static CGFloat const ISRefreshControlThreshold = 80.f;
+static CGFloat const ISRefreshControlThreshold = 69.f;
 
 @interface ISRefreshControl ()
 
@@ -129,7 +129,7 @@ static CGFloat const ISRefreshControlThreshold = 80.f;
     CGSize placeholderSize = self.placeholderView.frame.size;
     CGRect placeholderFrame = self.placeholderView.frame;
     placeholderFrame.origin.x = (self.frame.size.width - placeholderSize.width) / 2.f;
-    placeholderFrame.origin.y = self.placeholderView.frame.size.height;//(self.frame.size.height - placeholderSize.width) / 2.f;
+    placeholderFrame.origin.y = 0.f;//(self.frame.size.height - placeholderSize.width) / 2.f;
     self.placeholderView.frame = placeholderFrame;
     
     
@@ -201,7 +201,7 @@ static CGFloat const ISRefreshControlThreshold = 80.f;
     
     switch (self.refreshingState) {
         case ISRefreshingStateNormal:
-            if (offset <= -ISRefreshControlThreshold && scrollView.isTracking) {
+            if (offset <= -ISRefreshControlThreshold && !scrollView.isTracking) {
                 [self beginRefreshing];
                 [self sendActionsForControlEvents:UIControlEventValueChanged];
             }
@@ -222,6 +222,13 @@ static CGFloat const ISRefreshControlThreshold = 80.f;
     
     
     [self sendActionsForControlEvents:UIControlEventEditingChanged];
+}
+
+- (void) dealloc
+{
+    if ([self.superview isKindOfClass:[UIScrollView class]]) {
+        [self.superview removeObserver:self forKeyPath:@"contentOffset"];
+    }
 }
 
 #pragma mark -
