@@ -178,6 +178,8 @@ static CGFloat const ISRefreshControlThreshold = 69.f;
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    if(!self.enabled) return;
+    
     CGFloat topInset = scrollView.contentInset.top;
     if (self.addedTopInset && !self.subtractingTopInset) {
         topInset -= self.frame.size.height;
